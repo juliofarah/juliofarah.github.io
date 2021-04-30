@@ -1,48 +1,146 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>AJS tester</title>
-  </head>
-  <body>
-    <form method="GET">
-      <input type="text" name="writeKey" placeholder="Write key"/>
-      <button>Load</button>
-    </form>
-    <p></p>
-
-    <button onclick="analytics.track('Product Viewed')">Track: Product Viewed</button>
-    <button onclick="analytics.track('Checkout Started')">Track: Checkout Started</button>
-    <button onclick="analytics.track('Coupon Denied')">Track: Coupon Denied</button>
-    <br/>
-    <button onclick="analytics.page('Home')">Page: Home</button>
-    <button onclick="analytics.page('About')">Page: About</button>
-    <button onclick="analytics.page('Contact')">Page: Contact</button>
-    <br/>
-    <button onclick="analytics.identify('julio')">Identify: spongebob</button>
-    <button onclick="analytics.identify('spongebob')">Identify: spongebob</button>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
 
     <script>
-      const {searchParams} = new URL(document.location)
-      const writeKey = searchParams.get('writeKey')
-      const cdnHost = searchParams.get('cdnHost')
-      const status = s => document.querySelector('p').innerText = s
+      !(function () {
+        var analytics = (window.analytics = window.analytics || [])
+        if (!analytics.initialize)
+          if (analytics.invoked)
+            window.console &&
+              console.error &&
+              console.error('Segment snippet included twice.')
+          else {
+            analytics.invoked = !0
+            analytics.methods = [
+              'trackSubmit',
+              'trackClick',
+              'trackLink',
+              'trackForm',
+              'pageview',
+              'identify',
+              'reset',
+              'group',
+              'track',
+              'ready',
+              'alias',
+              'debug',
+              'page',
+              'once',
+              'off',
+              'on',
+              'addSourceMiddleware',
+              'addIntegrationMiddleware',
+              'setAnonymousId',
+              'addDestinationMiddleware',
+            ]
+            analytics.factory = function (e) {
+              return function () {
+                var t = Array.prototype.slice.call(arguments)
+                t.unshift(e)
+                analytics.push(t)
+                return analytics
+              }
+            }
+            for (var e = 0; e < analytics.methods.length; e++) {
+              var key = analytics.methods[e]
+              analytics[key] = analytics.factory(key)
+            }
+            analytics.load = function (key, e) {
+              var t = document.createElement('script')
+              t.type = 'text/javascript'
+              t.async = !0
+              t.src = 'https://segment-ajs-renderer-compiled-production.s3-us-west-2.amazonaws.com/analytics-next/br/webpack5/latest/standalone.js'
+              var n = document.getElementsByTagName('script')[0]
+              n.parentNode.insertBefore(t, n)
+              analytics._loadOptions = e
+            }
+            analytics.SNIPPET_VERSION = '4.13.1'
+            analytics._writeKey = '2fZvjLp5V9mHNUkdNOYKN2Pmfw7qNlZv'
+            analytics.load()
+            analytics.page()
+          }
+      })()
+    </script>
 
-      document.querySelector('input').value = writeKey
 
-      if(writeKey) {
-        !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t,e){var n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src="https://"+cdnHost+"/analytics.js/v1/"+t+"/analytics.js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(n,a);analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.1.0";
-          analytics.load(writeKey);
-          analytics.page();
-        }}();
 
-        status('loading ajs')
 
-        analytics.ready(() =>
-          status(`ajs ${analytics.VERSION} loaded, write key: ${analytics._integrations['Segment.io'].options.apiKey}`)
+  </head>
+ <body>
+    <form>
+      <textarea name="event" id="event">
+{
+  "name": "hi",
+  "properties": { },
+  "traits": { },
+  "options": { }
+}
+    </textarea
+      >
+      <div>
+        <button id="track">Track</button>
+        <button id="identify">Identify</button>
+      </div>
+    </form>
+
+    <pre id="ready-logs"></pre>
+    <pre id="logs"></pre>
+
+    <script type="text/javascript">
+      window.analytics.ready(function onReady() {
+        document.querySelector('#ready-logs').textContent = 'ready!'
+      })
+
+      document.querySelector('#track').addEventListener('click', function (e) {
+        e.preventDefault()
+        var contents = document.querySelector('#event').value
+        var evt = JSON.parse(contents)
+        var promise = window.analytics.track(
+          evt.name || '',
+          evt.properties || {},
+          evt.options || {}
         )
-      }
-      else {
-        status('ajs not loaded, enter a write key')
-      }
+
+        promise &&
+          promise.then &&
+          promise.then(function (ctx) {
+            ctx.flush()
+            document.querySelector('#logs').textContent = JSON.stringify(
+              ctx.event,
+              null,
+              '  '
+            )
+          })
+      })
+
+      document
+        .querySelector('#identify')
+        .addEventListener('click', function (e) {
+          e.preventDefault()
+          var contents = document.querySelector('#event').value
+          var evt = JSON.parse(contents)
+          var promise = window.analytics.identify(
+            evt.name || '',
+            evt.properties || {},
+            evt.options || {}
+          )
+
+          promise &&
+            promise.then &&
+            promise.then(function (ctx) {
+              ctx.flush()
+              document.querySelector('#logs').textContent = JSON.stringify(
+                ctx.event,
+                null,
+                '  '
+              )
+            })
+        })
     </script>
   </body>
 </html>
